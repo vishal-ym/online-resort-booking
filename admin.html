@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Dashboard | Mud House Hampi</title>
+  <meta name="description" content="Secure administrative controls and executive metrics for Mud House Hampi.">
+  
+  <!-- Blocking Session Authentication Script (Prevents dashboard content flicker) -->
+  <script>
+    (function() {
+      const session = sessionStorage.getItem("mudhouse_admin_session");
+      if (!session || !session.startsWith("jwt-token-mhh")) {
+        window.location.href = "login.html";
+      }
+    })();
+  </script>
+
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js CDN for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body style="background: var(--bg-primary);">
+
+  <!-- ==========================================
+       EXECUTIVE DASHBOARD CONTAINER
+       ========================================== -->
+  <div class="admin-container" id="admin-dashboard-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-header">
+        <a href="index.html" class="logo-container">
+          <div class="logo-icon">M</div>
+          <div class="logo-text">MUD HOUSE <span class="text-gold">ADMIN</span></div>
+        </a>
+      </div>
+      
+      <nav style="flex-grow: 1;">
+        <ul class="admin-menu">
+          <li class="admin-menu-item active" id="menu-tab-dashboard">
+            <a href="#" onclick="switchAdminTab('dashboard')"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+          </li>
+          <li class="admin-menu-item" id="menu-tab-bookings">
+            <a href="#" onclick="switchAdminTab('bookings')"><i class="fa-solid fa-receipt"></i> Reservations</a>
+          </li>
+          <li class="admin-menu-item" id="menu-tab-rooms">
+            <a href="#" onclick="switchAdminTab('rooms')"><i class="fa-solid fa-hotel"></i> Room Control</a>
+          </li>
+        </ul>
+      </nav>
+      
+      <button class="admin-logout-btn" onclick="handleAdminLogout()">
+        <i class="fa-solid fa-right-from-bracket"></i> End Session (Logout)
+      </button>
+    </aside>
+    
+    <!-- Main Panel Area -->
+    <main class="admin-main">
+      
+      <!-- Admin Navbar -->
+      <header class="admin-navbar">
+        <div>
+          <h2 style="font-size: 2rem; font-weight: 700; color: var(--text-primary);" id="admin-page-title">Executive Overview</h2>
+          <p style="font-size: 0.9rem; color: var(--text-muted); margin-top: 0.25rem;">Hampi Eco-Resorts Core Operations Panel</p>
+        </div>
+        
+        <div class="admin-profile">
+          <button class="theme-toggle-btn" id="admin-theme-toggle" title="Switch Theme" style="margin-right: 0.5rem;">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+          <div class="admin-profile-avatar">AS</div>
+          <div class="admin-profile-info">
+            <h5>Aditi Sharma</h5>
+            <span>General Manager</span>
+          </div>
+        </div>
+      </header>
+      
+      <!-- ==========================================
+           TAB PANEL: OVERVIEW / ANALYTICS
+           ========================================== -->
+      <section class="admin-tab-panel active" id="panel-dashboard">
+        <!-- Metric Cards -->
+        <div class="admin-metrics-grid">
+          <div class="metric-card">
+            <div class="metric-info">
+              <h6>Total Revenue</h6>
+              <div class="metric-value" id="metric-revenue">₹56,560</div>
+              <div class="metric-change positive"><i class="fa-solid fa-arrow-trend-up"></i> +12.4% vs last wk</div>
+            </div>
+            <div class="metric-icon"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-info">
+              <h6>Occupancy Rate</h6>
+              <div class="metric-value" id="metric-occupancy">78%</div>
+              <div class="metric-change positive"><i class="fa-solid fa-arrow-trend-up"></i> +5.2% vs last wk</div>
+            </div>
+            <div class="metric-icon"><i class="fa-solid fa-house-circle-check"></i></div>
+          </div>
+          
+          <div class="metric-card" id="metric-pending-card">
+            <div class="metric-info">
+              <h6>Pending Bookings</h6>
+              <div class="metric-value" id="metric-pending" style="color: var(--primary);">1</div>
+              <div class="metric-change" id="metric-pending-sub" style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-circle-exclamation"></i> Action required</div>
+            </div>
+            <div class="metric-icon" style="background: rgba(var(--primary-rgb), 0.15);"><i class="fa-solid fa-clock-rotate-left"></i></div>
+          </div>
+          
+          <div class="metric-card">
+            <div class="metric-info">
+              <h6>Total Guests</h6>
+              <div class="metric-value" id="metric-guests">18</div>
+              <div class="metric-change positive"><i class="fa-solid fa-arrow-trend-up"></i> +8.7% vs last wk</div>
+            </div>
+            <div class="metric-icon"><i class="fa-solid fa-user-group"></i></div>
+          </div>
+        </div>
+        
+        <!-- Double-Column Charts Grid -->
+        <div class="dashboard-grid">
+          <!-- Charts -->
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3 class="admin-card-title">Weekly Revenue Trends</h3>
+              <i class="fa-solid fa-chart-area" style="color: var(--primary);"></i>
+            </div>
+            <div style="height: 300px; position: relative;">
+              <canvas id="revenueLineChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- AI Occupancy Prediction & Weather Widget -->
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3 class="admin-card-title"><i class="fa-solid fa-brain" style="color: var(--primary);"></i> AI Room Forecast</h3>
+              <span style="font-size: 0.75rem; background: var(--border-color); padding: 0.25rem 0.5rem; border-radius: var(--radius-sm); font-weight: 700; text-transform: uppercase;">Next 7 Days</span>
+            </div>
+            <p style="color: var(--text-secondary); font-size: 0.8rem; margin-bottom: 1.5rem; line-height: 1.6;">
+              Predicted occupancies based on weather forecasts (sunny climate), calendar seasonality, and active pending UTR verifications:
+            </p>
+            <div class="forecast-container">
+              <div class="forecast-item">
+                <span class="forecast-day">Mon</span>
+                <div class="forecast-progress-wrapper">
+                  <div class="forecast-progress" style="width: 82%;"></div>
+                </div>
+                <span class="forecast-pct">82%</span>
+              </div>
+              
+              <div class="forecast-item">
+                <span class="forecast-day">Wed</span>
+                <div class="forecast-progress-wrapper">
+                  <div class="forecast-progress" style="width: 76%;"></div>
+                </div>
+                <span class="forecast-pct">76%</span>
+              </div>
+              
+              <div class="forecast-item">
+                <span class="forecast-day">Fri</span>
+                <div class="forecast-progress-wrapper">
+                  <div class="forecast-progress" style="width: 95%;"></div>
+                </div>
+                <span class="forecast-pct">95%</span>
+              </div>
+              
+              <div class="forecast-item">
+                <span class="forecast-day">Sat</span>
+                <div class="forecast-progress-wrapper">
+                  <div class="forecast-progress" style="width: 100%;"></div>
+                </div>
+                <span class="forecast-pct">100%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Double-Column Charts Row 2 -->
+        <div class="dashboard-grid" style="grid-template-columns: 1fr 2fr;">
+          <!-- Pie Chart -->
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3 class="admin-card-title">Cottage Share</h3>
+              <i class="fa-solid fa-chart-pie" style="color: var(--primary);"></i>
+            </div>
+            <div style="height: 250px; position: relative; display: flex; align-items: center; justify-content: center;">
+              <canvas id="roomShareChart"></canvas>
+            </div>
+          </div>
+          
+          <!-- Recent Pending Bookings Table -->
+          <div class="admin-card">
+            <div class="admin-card-header">
+              <h3 class="admin-card-title">Pending UPI Confirmations</h3>
+              <a href="#" onclick="switchAdminTab('bookings')" style="font-size: 0.85rem; font-weight: 700; color: var(--primary);">View All</a>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Ref</th>
+                    <th>Guest</th>
+                    <th>Room Reserved</th>
+                    <th>Nights</th>
+                    <th>Total</th>
+                    <th>UTR ID</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-pending-table-body">
+                  <!-- Pending transactions loaded via admin.js -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ==========================================
+           TAB PANEL: RESERVATION MANAGEMENT
+           ========================================== -->
+      <section class="admin-tab-panel" id="panel-bookings" style="display: none;">
+        <div class="admin-card">
+          <div class="admin-card-header">
+            <h3 class="admin-card-title">All Reservations Ledger</h3>
+            <div style="display: flex; gap: 0.75rem;">
+              <!-- Simple search filter inside ledger -->
+              <input type="text" id="bookings-search-input" placeholder="Search by name, reference, or UTR..." style="border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.5rem 1rem; outline: none; background: var(--bg-primary); color: var(--text-primary); font-size: 0.85rem;">
+            </div>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Ref</th>
+                  <th>Guest Info</th>
+                  <th>Room</th>
+                  <th>Dates</th>
+                  <th>Nights</th>
+                  <th>Total Cost</th>
+                  <th>UPI UTR ID</th>
+                  <th>Status</th>
+                  <th>Controls</th>
+                </tr>
+              </thead>
+              <tbody id="admin-all-bookings-body">
+                <!-- Bookings loaded from local storage -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      
+      <!-- ==========================================
+           TAB PANEL: ROOM CONTROL & PRICE EDIT
+           ========================================== -->
+      <section class="admin-tab-panel" id="panel-rooms" style="display: none;">
+        <div class="admin-card" style="margin-bottom: 2rem;">
+          <div class="admin-card-header">
+            <h3 class="admin-card-title">Manage Earthen Dwellings</h3>
+            <span style="font-size: 0.8rem; color: var(--text-muted);"><i class="fa-solid fa-circle-exclamation"></i> Edits here propagate to the customer site immediately</span>
+          </div>
+          
+          <div class="table-responsive">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Cottage Image</th>
+                  <th>Cottage Name</th>
+                  <th>Base Rate / Night</th>
+                  <th>Capacity</th>
+                  <th>Outlook View</th>
+                  <th>Maintenance Status</th>
+                  <th>Controls</th>
+                </tr>
+              </thead>
+              <tbody id="admin-rooms-table-body">
+                <!-- Loaded from localStorage rooms -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Quick Room Editor Modal/Box inside view -->
+        <div class="admin-card" id="room-editor-box" style="display: none; border-color: var(--primary);">
+          <div class="admin-card-header">
+            <h3 class="admin-card-title" id="room-editor-title">Edit Deluxe Mud Cottage</h3>
+            <button class="modal-close" onclick="closeRoomEditor()"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+          
+          <form id="room-editor-form" onsubmit="event.preventDefault(); saveEditedRoom();">
+            <div class="form-grid">
+              <div class="booking-field">
+                <label>Base Price per Night (₹)</label>
+                <div class="booking-input-wrapper" style="margin-top: 0.25rem;">
+                  <i class="fa-solid fa-indian-rupee-sign" style="left: 0.85rem; color: var(--primary);"></i>
+                  <input type="number" id="edit-room-price" style="padding-left: 2.25rem;" required>
+                </div>
+              </div>
+              
+              <div class="booking-field">
+                <label>Maintenance Status</label>
+                <div class="booking-input-wrapper" style="margin-top: 0.25rem;">
+                  <i class="fa-solid fa-screwdriver-wrench" style="left: 0.85rem; color: var(--primary);"></i>
+                  <select id="edit-room-status" style="padding-left: 2.25rem;">
+                    <option value="Available">Available</option>
+                    <option value="Under Maintenance">Under Maintenance</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="booking-field form-group-full">
+                <label>Resort Description</label>
+                <textarea id="edit-room-description" rows="3" style="width: 100%; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.85rem 1rem; outline: none; background: rgba(var(--primary-rgb), 0.03); color: var(--text-primary); transition: var(--transition-smooth); font-family: inherit; margin-top: 0.25rem;" required></textarea>
+              </div>
+            </div>
+            
+            <div style="margin-top: 1.5rem; text-align: right;">
+              <button type="button" class="btn-outline-luxury" onclick="closeRoomEditor()" style="margin-right: 0.5rem;">Cancel</button>
+              <button type="submit" class="btn-luxury">Save Room Changes <i class="fa-solid fa-floppy-disk"></i></button>
+            </div>
+          </form>
+        </div>
+      </section>
+      
+    </main>
+  </div>
+
+  <!-- Admin Dashboard Logic -->
+  <script src="admin.js"></script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Executive Login | Mud House Hampi</title>
+  <meta name="description" content="Secure administrative login for Mud House Hampi.">
+  
+  <!-- CSS Stylesheets -->
+  <link rel="stylesheet" href="style.css">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="login-body">
+
+  <div class="login-box">
+    <div style="position: absolute; top: 1.5rem; left: 1.5rem;">
+      <a href="index.html" class="btn-outline-luxury" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+        <i class="fa-solid fa-arrow-left"></i> Resort Home
+      </a>
+    </div>
+    
+    <div class="login-logo" style="margin-top: 1rem;">MUD HOUSE HAMPI</div>
+    <div class="login-subtitle"><i class="fa-solid fa-shield-halved"></i> Executive Portal Authentication</div>
+    
+    <form id="admin-login-form">
+      <div class="booking-field" style="text-align: left; margin-bottom: 1.25rem;">
+        <label>Administrator Username</label>
+        <div class="booking-input-wrapper" style="margin-top: 0.25rem;">
+          <i class="fa-solid fa-user-tie" style="left: 0.85rem; color: var(--primary);"></i>
+          <input type="text" id="login-username" style="padding-left: 2.25rem;" placeholder="e.g. admin" required>
+        </div>
+      </div>
+      
+      <div class="booking-field" style="text-align: left; margin-bottom: 2rem;">
+        <label>Security Password</label>
+        <div class="booking-input-wrapper" style="margin-top: 0.25rem;">
+          <i class="fa-solid fa-lock" style="left: 0.85rem; color: var(--primary);"></i>
+          <input type="password" id="login-password" style="padding-left: 2.25rem;" placeholder="e.g. password123" required>
+        </div>
+      </div>
+      
+      <button type="submit" class="btn-luxury" style="width: 100%; justify-content: center; height: 50px; font-size: 1rem;">
+        Secure Sign In <i class="fa-solid fa-key"></i>
+      </button>
+      
+      <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1.5rem;">
+        <i class="fa-solid fa-circle-info"></i> For testing, use username <b>admin</b> and password <b>password123</b>.
+      </p>
+    </form>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>
